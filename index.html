@@ -1,0 +1,1355 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>个人计划工作台</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f2f0eb;
+      --paper: #f2f0eb;
+      --paper-strong: #ffffff;
+      --ink: #292827;
+      --muted: #666666;
+      --line: #e3e3e2;
+      --wine: #421d24;
+      --violet: #714cb6;
+      --lilac: #d4c7ff;
+      --lagoon: #0c4243;
+      --shadow: 0 0 0 1px rgba(227, 227, 226, .9);
+      font-family: Inter, "SF Pro Display", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background: var(--bg);
+    }
+
+    button, input, select, textarea { font: inherit; }
+    button { border: 0; cursor: pointer; }
+
+    .app {
+      width: min(1220px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 34px 0 48px;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 20px;
+      align-items: end;
+      margin-bottom: 28px;
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      width: fit-content;
+      padding: 8px 12px;
+      border: 1px solid var(--wine);
+      border-radius: 999px;
+      background: var(--wine);
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 52px;
+      font-weight: 700;
+      line-height: .98;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      max-width: 720px;
+      margin: 12px 0 0;
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 18px;
+    }
+
+    .clock {
+      min-width: 230px;
+      padding: 18px 20px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, .82);
+      box-shadow: var(--shadow);
+    }
+
+    .time {
+      font-size: 34px;
+      font-weight: 500;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .date {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--paper-strong);
+      box-shadow: var(--shadow);
+    }
+
+    .side {
+      position: sticky;
+      top: 18px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .box { padding: 20px; }
+
+    .panel-title {
+      margin: 0 0 14px;
+      font-size: 19px;
+      font-weight: 600;
+      letter-spacing: 0;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      outline: 0;
+      background: #ffffff;
+      color: var(--ink);
+      padding: 10px 11px;
+      transition: border-color .18s ease, box-shadow .18s ease;
+    }
+
+    textarea {
+      min-height: 82px;
+      resize: vertical;
+      line-height: 1.55;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--violet);
+      box-shadow: 0 0 0 4px rgba(212, 199, 255, .5);
+    }
+
+    .field { margin-bottom: 13px; }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .primary, .ghost, .mini {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      min-height: 44px;
+      border-radius: 16px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .primary {
+      width: 100%;
+      color: white;
+      background: var(--wine);
+      box-shadow: none;
+    }
+
+    .primary:hover { background: #32151b; }
+
+    .ghost {
+      border: 1px solid var(--ink);
+      background: var(--lilac);
+      color: var(--ink);
+      padding: 0 12px;
+    }
+
+    .ghost:hover { background: #c9b9fb; }
+
+    .mini {
+      min-height: 36px;
+      padding: 0 10px;
+      border-radius: 8px;
+      background: #ffffff;
+      color: var(--ink);
+      box-shadow: var(--shadow);
+    }
+
+    .mini:hover { background: var(--lilac); }
+
+    .voice-field {
+      position: relative;
+    }
+
+    .voice-field input,
+    .voice-field textarea {
+      padding-right: 48px;
+    }
+
+    .voice-icon {
+      position: absolute;
+      top: 7px;
+      right: 7px;
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--ink);
+      border-radius: 8px;
+      background: #ffffff;
+      color: var(--ink);
+    }
+
+    .voice-field textarea + .voice-icon {
+      top: 44px;
+    }
+
+    .voice-icon.listening {
+      background: var(--wine);
+      color: #ffffff;
+    }
+
+    .voice-icon svg {
+      width: 15px;
+      height: 15px;
+      stroke-width: 2.2;
+    }
+
+    .voice-status {
+      margin: 7px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .view-toggle {
+      display: inline-grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2px;
+      padding: 3px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #ffffff;
+    }
+
+    .view-toggle button {
+      min-height: 30px;
+      padding: 0 12px;
+      border-radius: 9px;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .view-toggle button.active {
+      background: var(--lilac);
+      color: var(--ink);
+    }
+
+    .sync-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .note {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .board { min-width: 0; }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .stat {
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #ffffff;
+      box-shadow: var(--shadow);
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 26px;
+      font-weight: 500;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stat span {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: auto 1fr auto auto;
+      gap: 10px;
+      align-items: center;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+
+    .day-nav {
+      display: inline-flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .day-title {
+      min-width: 0;
+      color: var(--ink);
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .progress {
+      height: 10px;
+      overflow: hidden;
+      margin-bottom: 14px;
+      border-radius: 999px;
+      background: #ffffff;
+      border: 1px solid var(--line);
+    }
+
+    .progress span {
+      display: block;
+      width: 0;
+      height: 100%;
+      background: var(--wine);
+      transition: width .25s ease;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: 16px;
+    }
+
+    table {
+      width: 100%;
+      min-width: 780px;
+      border-collapse: separate;
+      border-spacing: 0;
+      background: var(--paper-strong);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 14px 16px;
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      color: var(--muted);
+      background: #f7f6f4;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    tr:last-child td { border-bottom: 0; }
+
+    .time-cell {
+      width: 150px;
+      color: var(--ink);
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .content-cell strong {
+      display: block;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
+    .content-cell span {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+      overflow-wrap: anywhere;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 0 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .todo { background: #f4eeee; color: var(--wine); }
+    .doing { background: #f1ebff; color: var(--violet); }
+    .half { background: var(--lilac); color: var(--ink); }
+    .done { background: #eff2ef; color: var(--lagoon); }
+    .waiting { background: #eeeeed; color: var(--muted); }
+
+    .check {
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--ink);
+      border-radius: 8px;
+      background: #ffffff;
+      color: white;
+    }
+
+    .check.done {
+      border-color: var(--wine);
+      background: var(--wine);
+    }
+
+    .actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .icon {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      background: #ffffff;
+      color: var(--ink);
+      box-shadow: var(--shadow);
+    }
+
+    .icon:hover { background: var(--lilac); }
+    .icon.danger:hover { background: #f4eeee; color: var(--wine); }
+
+    .icon svg, .check svg {
+      width: 16px;
+      height: 16px;
+      stroke-width: 2.4;
+    }
+
+    .empty {
+      padding: 46px 24px;
+      border: 1px dashed var(--line);
+      border-radius: 16px;
+      background: #ffffff;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .empty strong {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--ink);
+      font-size: 20px;
+    }
+
+    .week-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(180px, 1fr));
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+
+    .week-day {
+      min-height: 280px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #ffffff;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .week-head {
+      padding: 14px;
+      border-bottom: 1px solid var(--line);
+      background: #f7f6f4;
+    }
+
+    .week-head strong {
+      display: block;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .week-head span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .week-items {
+      display: grid;
+      gap: 8px;
+      padding: 10px;
+    }
+
+    .week-item {
+      display: grid;
+      gap: 6px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #ffffff;
+    }
+
+    .week-item-time {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .week-item-title {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
+    .week-empty {
+      padding: 14px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @media (max-width: 960px) {
+      .topbar, .layout { grid-template-columns: 1fr; }
+      .side { position: static; }
+      .summary { grid-template-columns: repeat(2, 1fr); }
+      .toolbar { grid-template-columns: 1fr; }
+      .day-nav { justify-content: center; }
+      .view-toggle { width: 100%; }
+    }
+
+    @media (max-width: 560px) {
+      .app {
+        width: min(100% - 20px, 1220px);
+        padding-top: 16px;
+      }
+
+      h1 { font-size: 36px; }
+      .row, .sync-grid, .summary { grid-template-columns: 1fr; }
+      .time { font-size: 30px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Daily planning table</p>
+        <h1>个人计划工作台</h1>
+        <p class="subtitle">以一天为单位整理完整时间段：从几点到几点、做什么、进度如何，都在一张清晰的表里。当天模板也可以同步到本月、未来 7 天或自定义日期。</p>
+      </div>
+      <section class="clock" aria-label="当前时间">
+        <div class="time" id="time">--:--</div>
+        <div class="date" id="date">正在读取日期</div>
+      </section>
+    </header>
+
+    <section class="layout">
+      <aside class="side">
+        <section class="panel box">
+          <h2 class="panel-title" id="formTitle">录入时间段</h2>
+          <form id="planForm">
+            <input type="hidden" id="planId">
+            <div class="field">
+              <label for="workDate">计划日期</label>
+              <input id="workDate" type="date" required>
+            </div>
+            <div class="row">
+              <div class="field">
+                <label for="startTime">开始</label>
+                <input id="startTime" type="time" required>
+              </div>
+              <div class="field">
+                <label for="endTime">结束</label>
+                <input id="endTime" type="time" required>
+              </div>
+            </div>
+            <div class="field">
+              <label for="workTitle">工作内容</label>
+              <div class="voice-field">
+                <input id="workTitle" maxlength="80" required placeholder="例如：写方案初稿">
+                <button class="voice-icon" type="button" data-voice-target="title" title="语音输入工作内容" aria-label="语音输入工作内容">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><path d="M12 19v3"/></svg>
+                </button>
+              </div>
+              <p class="voice-status" id="titleVoiceStatus">点工作内容里的图标，说：今天九点到十点我要做周报</p>
+            </div>
+            <div class="field">
+              <label for="workNote">备注</label>
+              <div class="voice-field">
+                <textarea id="workNote" maxlength="220" placeholder="目标、提醒、材料或想法"></textarea>
+                <button class="voice-icon" type="button" data-voice-target="note" title="语音输入备注" aria-label="语音输入备注">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><path d="M12 19v3"/></svg>
+                </button>
+              </div>
+              <p class="voice-status" id="noteVoiceStatus">点备注里的图标，说补充说明，只会填入备注。</p>
+            </div>
+            <div class="row">
+              <div class="field">
+                <label for="workStatus">状态</label>
+                <select id="workStatus">
+                  <option value="todo">未完成</option>
+                  <option value="doing">进行中</option>
+                  <option value="half">完成一半</option>
+                  <option value="done">已完成</option>
+                  <option value="waiting">暂缓</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="workPriority">优先级</label>
+                <select id="workPriority">
+                  <option value="normal">普通</option>
+                  <option value="high">重要</option>
+                  <option value="low">轻松</option>
+                </select>
+              </div>
+            </div>
+            <button class="primary" type="submit">
+              <span id="submitIcon">＋</span>
+              <span id="submitText">加入日程表</span>
+            </button>
+          </form>
+        </section>
+
+        <section class="panel box">
+          <h2 class="panel-title">同步当天模板</h2>
+          <div class="field">
+            <label for="syncMode">同步范围</label>
+            <select id="syncMode">
+              <option value="month">同步到本月剩余日期</option>
+              <option value="week">同步到未来 7 天</option>
+              <option value="range">同步到自定义日期</option>
+            </select>
+          </div>
+          <div class="sync-grid">
+            <div class="field">
+              <label for="syncStart">开始日期</label>
+              <input id="syncStart" type="date">
+            </div>
+            <div class="field">
+              <label for="syncEnd">结束日期</label>
+              <input id="syncEnd" type="date">
+            </div>
+          </div>
+          <button class="ghost" type="button" id="syncBtn">同步当前这一天</button>
+          <p class="note">同步会复制当前日期的时间段和工作内容到目标日期。目标日期已有计划时，会先替换为这一天的模板。</p>
+        </section>
+      </aside>
+
+      <section class="board" aria-label="日计划表">
+        <div class="summary" id="summary"></div>
+        <div class="progress" aria-label="当天完成进度"><span id="progressBar"></span></div>
+        <div class="panel toolbar">
+          <div class="day-nav">
+            <button class="mini" type="button" id="prevDay">‹ 前一天</button>
+            <button class="mini" type="button" id="todayBtn">今天</button>
+            <button class="mini" type="button" id="nextDay">后一天 ›</button>
+          </div>
+          <div class="day-title" id="dayTitle">今天</div>
+          <div class="view-toggle" aria-label="视图切换">
+            <button type="button" class="active" data-view="day">日</button>
+            <button type="button" data-view="week">周</button>
+          </div>
+          <button class="ghost" type="button" id="clearDayDone">清理当天已完成</button>
+        </div>
+        <div class="table-wrap" id="tableWrap"></div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const storeKey = "personal-plan-table-v2";
+    const legacyKey = "personal-plan-workbench-v1";
+    const statusMap = {
+      todo: { label: "未完成", className: "todo" },
+      doing: { label: "进行中", className: "doing" },
+      half: { label: "完成一半", className: "half" },
+      done: { label: "已完成", className: "done" },
+      waiting: { label: "暂缓", className: "waiting" }
+    };
+    const priorityMap = { high: "重要", normal: "普通", low: "轻松" };
+
+    const form = document.querySelector("#planForm");
+    const selectedDateInput = document.querySelector("#workDate");
+    const viewButtons = [...document.querySelectorAll("[data-view]")];
+    const voiceButtons = [...document.querySelectorAll("[data-voice-target]")];
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let selectedDate = todayInput();
+    let viewMode = "day";
+    let plans = loadPlans();
+    let recognition = null;
+    let activeVoiceTarget = "title";
+
+    function todayInput() {
+      return toDateInput(new Date());
+    }
+
+    function toDateInput(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    function addDays(dateText, amount) {
+      const date = new Date(`${dateText}T12:00:00`);
+      date.setDate(date.getDate() + amount);
+      return toDateInput(date);
+    }
+
+    function monthEnd(dateText) {
+      const date = new Date(`${dateText}T12:00:00`);
+      return toDateInput(new Date(date.getFullYear(), date.getMonth() + 1, 0));
+    }
+
+    function makePlan(date, start, end, title, note, status, priority) {
+      return {
+        id: crypto.randomUUID(),
+        date,
+        start,
+        end,
+        title,
+        note,
+        status,
+        priority,
+        createdAt: Date.now()
+      };
+    }
+
+    function seedPlans() {
+      const today = todayInput();
+      return [
+        makePlan(today, "08:30", "09:00", "整理今天的重点", "确认最重要的三件事。", "doing", "high"),
+        makePlan(today, "09:00", "11:30", "深度工作时间", "处理最需要专注的核心任务。", "todo", "high"),
+        makePlan(today, "14:00", "16:00", "推进执行与沟通", "回复必要消息，推进协作事项。", "todo", "normal"),
+        makePlan(today, "20:30", "21:00", "晚间复盘", "记录完成情况和明天第一步。", "todo", "low")
+      ];
+    }
+
+    function migrateLegacy(items) {
+      return items.map(item => {
+        const start = item.time || "09:00";
+        const [hour, minute] = start.split(":").map(Number);
+        const endDate = new Date();
+        endDate.setHours(hour || 9, minute || 0, 0, 0);
+        endDate.setMinutes(endDate.getMinutes() + 60);
+        return makePlan(
+          item.date || todayInput(),
+          start,
+          `${String(endDate.getHours()).padStart(2, "0")}:${String(endDate.getMinutes()).padStart(2, "0")}`,
+          item.title || "未命名计划",
+          item.note || "",
+          item.status || "todo",
+          item.priority || "normal"
+        );
+      });
+    }
+
+    function loadPlans() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(storeKey) || "null");
+        if (Array.isArray(saved)) return saved;
+        const legacy = JSON.parse(localStorage.getItem(legacyKey) || "null");
+        if (Array.isArray(legacy)) return migrateLegacy(legacy);
+        return seedPlans();
+      } catch {
+        return seedPlans();
+      }
+    }
+
+    function savePlans() {
+      localStorage.setItem(storeKey, JSON.stringify(plans));
+    }
+
+    function updateClock() {
+      const now = new Date();
+      document.querySelector("#time").textContent = now.toLocaleTimeString("zh-CN", {
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+      document.querySelector("#date").textContent = now.toLocaleDateString("zh-CN", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        weekday: "long"
+      });
+    }
+
+    function escapeHtml(value) {
+      return String(value || "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      })[char]);
+    }
+
+    function icon(name) {
+      const icons = {
+        check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m5 12 4 4L19 6"/></svg>',
+        edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
+        trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="m19 6-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>'
+      };
+      return icons[name];
+    }
+
+    function score(plan) {
+      if (plan.status === "done") return 1;
+      if (plan.status === "half") return .5;
+      if (plan.status === "doing") return .35;
+      return 0;
+    }
+
+    function planSortValue(plan) {
+      return `${plan.status === "done" ? 1 : 0}-${plan.start}-${plan.end}-${plan.createdAt || 0}`;
+    }
+
+    function dayPlans() {
+      return plans
+        .filter(plan => plan.date === selectedDate)
+        .sort((a, b) => planSortValue(a).localeCompare(planSortValue(b)));
+    }
+
+    function weekStart(dateText) {
+      const date = new Date(`${dateText}T12:00:00`);
+      const day = date.getDay() || 7;
+      date.setDate(date.getDate() - day + 1);
+      return toDateInput(date);
+    }
+
+    function weekDates(dateText) {
+      const start = weekStart(dateText);
+      return Array.from({ length: 7 }, (_, index) => addDays(start, index));
+    }
+
+    function weekPlans() {
+      const dates = weekDates(selectedDate);
+      return plans
+        .filter(plan => dates.includes(plan.date))
+        .sort((a, b) => `${a.date}-${planSortValue(a)}`.localeCompare(`${b.date}-${planSortValue(b)}`));
+    }
+
+    function renderSummary(items) {
+      const total = items.length;
+      const done = items.filter(item => item.status === "done").length;
+      const half = items.filter(item => item.status === "half").length;
+      const percent = total ? Math.round(items.reduce((sum, item) => sum + score(item), 0) / total * 100) : 0;
+      document.querySelector("#summary").innerHTML = [
+        ["当天时间段", total],
+        ["已完成", done],
+        ["完成一半", half],
+        ["进度", `${percent}%`]
+      ].map(([label, value]) => `<div class="stat"><strong>${value}</strong><span>${label}</span></div>`).join("");
+      document.querySelector("#progressBar").style.width = `${percent}%`;
+    }
+
+    function renderDayTable() {
+      const items = dayPlans();
+      renderSummary(items);
+      selectedDateInput.value = selectedDate;
+      document.querySelector("#dayTitle").textContent = new Date(`${selectedDate}T12:00:00`).toLocaleDateString("zh-CN", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        weekday: "long"
+      });
+
+      if (!items.length) {
+        document.querySelector("#tableWrap").innerHTML = '<div class="empty"><strong>这一天还没有计划</strong>添加几个时间段，就会变成一张完整的日计划表。</div>';
+        return;
+      }
+
+      document.querySelector("#tableWrap").innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>完成</th>
+              <th>时间段</th>
+              <th>工作内容</th>
+              <th>状态</th>
+              <th>优先级</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${items.map(plan => {
+              const status = statusMap[plan.status] || statusMap.todo;
+              const isDone = plan.status === "done";
+              return `
+                <tr>
+                  <td>
+                    <button class="check ${isDone ? "done" : ""}" type="button" data-action="toggle" data-id="${plan.id}" title="切换完成状态" aria-label="切换完成状态">
+                      ${isDone ? icon("check") : ""}
+                    </button>
+                  </td>
+                  <td class="time-cell">${escapeHtml(plan.start)} - ${escapeHtml(plan.end)}</td>
+                  <td class="content-cell">
+                    <strong>${escapeHtml(plan.title)}</strong>
+                    ${plan.note ? `<span>${escapeHtml(plan.note)}</span>` : ""}
+                  </td>
+                  <td><span class="pill ${status.className}">${status.label}</span></td>
+                  <td><span class="pill">${priorityMap[plan.priority] || "普通"}</span></td>
+                  <td>
+                    <div class="actions">
+                      <button class="icon" type="button" data-action="edit" data-id="${plan.id}" title="编辑" aria-label="编辑">${icon("edit")}</button>
+                      <button class="icon danger" type="button" data-action="delete" data-id="${plan.id}" title="删除" aria-label="删除">${icon("trash")}</button>
+                    </div>
+                  </td>
+                </tr>
+              `;
+            }).join("")}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function renderWeekTable() {
+      const dates = weekDates(selectedDate);
+      const items = weekPlans();
+      const startLabel = new Date(`${dates[0]}T12:00:00`).toLocaleDateString("zh-CN", { month: "short", day: "numeric" });
+      const endLabel = new Date(`${dates[6]}T12:00:00`).toLocaleDateString("zh-CN", { month: "short", day: "numeric" });
+      renderSummary(items);
+      selectedDateInput.value = selectedDate;
+      document.querySelector("#dayTitle").textContent = `${startLabel} - ${endLabel} 周计划`;
+      document.querySelector("#tableWrap").innerHTML = `
+        <div class="week-grid">
+          ${dates.map(date => {
+            const dayItems = plans
+              .filter(plan => plan.date === date)
+              .sort((a, b) => planSortValue(a).localeCompare(planSortValue(b)));
+            const head = new Date(`${date}T12:00:00`).toLocaleDateString("zh-CN", { weekday: "long", month: "short", day: "numeric" });
+            return `
+              <section class="week-day">
+                <div class="week-head">
+                  <strong>${escapeHtml(head)}</strong>
+                  <span>${dayItems.length} 个时间段</span>
+                </div>
+                ${dayItems.length ? `
+                  <div class="week-items">
+                    ${dayItems.map(plan => {
+                      const status = statusMap[plan.status] || statusMap.todo;
+                      return `
+                        <article class="week-item">
+                          <div class="week-item-time">${escapeHtml(plan.start)} - ${escapeHtml(plan.end)}</div>
+                          <p class="week-item-title">${escapeHtml(plan.title)}</p>
+                          <span class="pill ${status.className}">${status.label}</span>
+                          <div class="actions">
+                            <button class="icon" type="button" data-action="toggle" data-id="${plan.id}" title="切换完成状态" aria-label="切换完成状态">${plan.status === "done" ? icon("check") : "✓"}</button>
+                            <button class="icon" type="button" data-action="edit" data-id="${plan.id}" title="编辑" aria-label="编辑">${icon("edit")}</button>
+                            <button class="icon danger" type="button" data-action="delete" data-id="${plan.id}" title="删除" aria-label="删除">${icon("trash")}</button>
+                          </div>
+                        </article>
+                      `;
+                    }).join("")}
+                  </div>
+                ` : '<div class="week-empty">暂无安排</div>'}
+              </section>
+            `;
+          }).join("")}
+        </div>
+      `;
+    }
+
+    function renderTable() {
+      viewButtons.forEach(button => button.classList.toggle("active", button.dataset.view === viewMode));
+      document.querySelector("#prevDay").textContent = viewMode === "week" ? "‹ 上一周" : "‹ 前一天";
+      document.querySelector("#nextDay").textContent = viewMode === "week" ? "下一周 ›" : "后一天 ›";
+      document.querySelector("#clearDayDone").textContent = viewMode === "week" ? "清理本周已完成" : "清理当天已完成";
+      if (viewMode === "week") {
+        renderWeekTable();
+        return;
+      }
+      renderDayTable();
+    }
+
+    function resetForm() {
+      form.reset();
+      document.querySelector("#planId").value = "";
+      document.querySelector("#workDate").value = selectedDate;
+      document.querySelector("#startTime").value = "09:00";
+      document.querySelector("#endTime").value = "10:00";
+      document.querySelector("#formTitle").textContent = "添加时间段";
+      document.querySelector("#submitText").textContent = "加入日程表";
+      document.querySelector("#submitIcon").textContent = "＋";
+    }
+
+    function setSelectedDate(dateText) {
+      selectedDate = dateText;
+      resetForm();
+      renderTable();
+      updateSyncRange();
+    }
+
+    function updateSyncRange() {
+      const mode = document.querySelector("#syncMode").value;
+      let start = addDays(selectedDate, 1);
+      let end = monthEnd(selectedDate);
+      if (mode === "week") end = addDays(selectedDate, 7);
+      if (mode === "range") {
+        start = document.querySelector("#syncStart").value || start;
+        end = document.querySelector("#syncEnd").value || end;
+      }
+      document.querySelector("#syncStart").value = start;
+      document.querySelector("#syncEnd").value = end;
+    }
+
+    function datesBetween(start, end) {
+      const dates = [];
+      let cursor = start;
+      while (cursor <= end) {
+        dates.push(cursor);
+        cursor = addDays(cursor, 1);
+      }
+      return dates;
+    }
+
+    function chineseNumberToInt(value) {
+      if (!value) return 0;
+      if (/^\d+$/.test(value)) return Number(value);
+      const map = { 零: 0, 一: 1, 二: 2, 两: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9 };
+      if (value === "十") return 10;
+      if (value.startsWith("十")) return 10 + (map[value[1]] || 0);
+      if (value.includes("十")) {
+        const [tens, ones] = value.split("十");
+        return (map[tens] || 1) * 10 + (map[ones] || 0);
+      }
+      return map[value] ?? 0;
+    }
+
+    function formatTime(hour, minute) {
+      return `${String(Math.min(Math.max(hour, 0), 23)).padStart(2, "0")}:${String(Math.min(Math.max(minute, 0), 59)).padStart(2, "0")}`;
+    }
+
+    function addOneHour(time) {
+      const [hour, minute] = time.split(":").map(Number);
+      return formatTime((hour + 1) % 24, minute || 0);
+    }
+
+    function applyPeriod(hour, period) {
+      if (!period) return hour;
+      if ((period.includes("下午") || period.includes("晚上")) && hour < 12) return hour + 12;
+      if (period.includes("中午") && hour < 11) return hour + 12;
+      return hour;
+    }
+
+    function parseSpokenDate(text) {
+      if (text.includes("后天")) return addDays(todayInput(), 2);
+      if (text.includes("明天")) return addDays(todayInput(), 1);
+      if (text.includes("今天")) return todayInput();
+      let weekMatch = text.match(/下周([一二三四五六日天])/);
+      let nextWeek = Boolean(weekMatch);
+      if (!weekMatch) {
+        weekMatch = text.match(/(下周)?(?:周|星期|礼拜)([一二三四五六日天])/);
+        nextWeek = Boolean(weekMatch && weekMatch[1]);
+      }
+      if (!weekMatch) return selectedDate;
+      const target = weekMatch[2] || weekMatch[1];
+      const targetMap = { 一: 1, 二: 2, 三: 3, 四: 4, 五: 5, 六: 6, 日: 7, 天: 7 };
+      const base = weekStart(todayInput());
+      const offset = targetMap[target] - 1 + (nextWeek ? 7 : 0);
+      return addDays(base, offset);
+    }
+
+    function parseSpokenTime(text) {
+      const match = text.match(/(上午|早上|中午|下午|晚上)?\s*([零一二两三四五六七八九十\d]{1,3})(?:[:：点时])([零一二两三四五六七八九十\d]{0,2})?(半)?\s*(?:到|至|-|—)\s*(上午|早上|中午|下午|晚上)?\s*([零一二两三四五六七八九十\d]{1,3})(?:[:：点时])([零一二两三四五六七八九十\d]{0,2})?(半)?/);
+      if (!match) return {
+        start: document.querySelector("#startTime").value || "09:00",
+        end: document.querySelector("#endTime").value || "10:00"
+      };
+      const startHour = applyPeriod(chineseNumberToInt(match[2]), match[1]);
+      const startMinute = match[4] ? 30 : chineseNumberToInt(match[3] || "0");
+      const endHour = applyPeriod(chineseNumberToInt(match[6]), match[5] || match[1]);
+      const endMinute = match[8] ? 30 : chineseNumberToInt(match[7] || "0");
+      return {
+        start: formatTime(startHour, startMinute),
+        end: formatTime(endHour, endMinute)
+      };
+    }
+
+    function parseSpokenStatus(text) {
+      if (text.includes("完成一半") || text.includes("一半")) return "half";
+      if (text.includes("进行中") || text.includes("开始做")) return "doing";
+      if (text.includes("已完成") || text.includes("完成了")) return "done";
+      if (text.includes("暂缓") || text.includes("推迟")) return "waiting";
+      return "todo";
+    }
+
+    function parseSpokenPriority(text) {
+      if (text.includes("重要") || text.includes("紧急") || text.includes("优先")) return "high";
+      if (text.includes("轻松") || text.includes("低优先")) return "low";
+      return "normal";
+    }
+
+    function cleanSpokenTitle(text) {
+      return text
+        .replace(/(今天|明天|后天|下周[一二三四五六日天]|周[一二三四五六日天]|星期[一二三四五六日天]|礼拜[一二三四五六日天])/g, "")
+        .replace(/(上午|早上|中午|下午|晚上)?\s*[零一二两三四五六七八九十\d]{1,3}(?:[:：点时])[零一二两三四五六七八九十\d]{0,2}?半?\s*(?:到|至|-|—)\s*(上午|早上|中午|下午|晚上)?\s*[零一二两三四五六七八九十\d]{1,3}(?:[:：点时])[零一二两三四五六七八九十\d]{0,2}?半?/g, "")
+        .replace(/(我要做|我想做|需要做|要做|做一下|未完成|进行中|完成一半|已完成|完成了|暂缓|推迟|重要|紧急|优先|轻松|低优先|安排|计划|创建|任务)/g, "")
+        .replace(/[，。,.]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function createPlanFromSpeech(transcript) {
+      const date = parseSpokenDate(transcript);
+      const { start, end } = parseSpokenTime(transcript);
+      const title = cleanSpokenTitle(transcript) || transcript.trim();
+      const status = parseSpokenStatus(transcript);
+      const priority = parseSpokenPriority(transcript);
+      const note = document.querySelector("#workNote").value.trim();
+      const plan = makePlan(date, start, end || addOneHour(start), title, note, status, priority);
+      plans = [...plans, plan];
+      savePlans();
+      setSelectedDate(date);
+      document.querySelector("#workDate").value = date;
+      document.querySelector("#startTime").value = plan.start;
+      document.querySelector("#endTime").value = plan.end;
+      document.querySelector("#workTitle").value = plan.title;
+      document.querySelector("#workNote").value = note;
+      document.querySelector("#workStatus").value = plan.status;
+      document.querySelector("#workPriority").value = plan.priority;
+      document.querySelector("#titleVoiceStatus").textContent = `已创建：${plan.start} - ${plan.end} ${plan.title}`;
+    }
+
+    function fillNoteFromSpeech(transcript) {
+      const noteInput = document.querySelector("#workNote");
+      const existing = noteInput.value.trim();
+      noteInput.value = existing ? `${existing} ${transcript}` : transcript;
+      document.querySelector("#noteVoiceStatus").textContent = "已输入备注。";
+      noteInput.focus();
+    }
+
+    function voiceErrorMessage(error) {
+      const messages = {
+        "no-speech": "没有听到声音，请靠近麦克风再试一次。",
+        "audio-capture": "没有检测到麦克风，请检查设备输入。",
+        "not-allowed": "麦克风权限被拒绝，请在浏览器地址栏允许麦克风。",
+        "service-not-allowed": "当前浏览器不允许语音识别服务，请换 Chrome 或 Safari 试试。",
+        network: "语音识别服务连接失败，请检查网络后再试。",
+        aborted: "语音识别已取消。"
+      };
+      return messages[error] || `识别失败：${error || "未知原因"}`;
+    }
+
+    function setupVoiceInput() {
+      const titleStatus = document.querySelector("#titleVoiceStatus");
+      const noteStatus = document.querySelector("#noteVoiceStatus");
+      const activeStatus = () => activeVoiceTarget === "note" ? noteStatus : titleStatus;
+      if (!SpeechRecognition) {
+        voiceButtons.forEach(button => {
+          button.disabled = true;
+          button.title = "当前浏览器不支持语音识别";
+        });
+        titleStatus.textContent = "当前浏览器不支持语音识别，可继续手动输入。";
+        noteStatus.textContent = "当前浏览器不支持语音识别，可继续手动输入。";
+        return;
+      }
+      recognition = new SpeechRecognition();
+      recognition.lang = "zh-CN";
+      recognition.interimResults = true;
+      recognition.continuous = false;
+      recognition.maxAlternatives = 3;
+      let finalTranscript = "";
+      let voiceCreated = false;
+      recognition.onstart = () => {
+        finalTranscript = "";
+        voiceCreated = false;
+        voiceButtons.forEach(button => button.classList.toggle("listening", button.dataset.voiceTarget === activeVoiceTarget));
+        activeStatus().textContent = activeVoiceTarget === "note"
+          ? "正在听备注内容。"
+          : "正在听：例如“今天九点到十点我要做周报”。";
+      };
+      recognition.onerror = event => {
+        voiceButtons.forEach(button => button.classList.remove("listening"));
+        activeStatus().textContent = voiceErrorMessage(event.error);
+      };
+      recognition.onend = () => {
+        voiceButtons.forEach(button => button.classList.remove("listening"));
+        if (!finalTranscript) activeStatus().textContent = activeVoiceTarget === "note"
+          ? "未收到备注语音，请再说一遍。"
+          : "未收到可创建的语音内容，请再说一遍。";
+      };
+      recognition.onresult = event => {
+        const pieces = [...event.results].map(result => result[0].transcript).join("");
+        activeStatus().textContent = `识别中：${pieces}`;
+        const finalPieces = [...event.results].filter(result => result.isFinal).map(result => result[0].transcript);
+        if (!finalPieces.length || voiceCreated) return;
+        finalTranscript = finalPieces.join("");
+        voiceCreated = true;
+        if (activeVoiceTarget === "note") {
+          fillNoteFromSpeech(finalTranscript);
+          return;
+        }
+        createPlanFromSpeech(finalTranscript);
+      };
+      recognition.onnomatch = () => {
+        activeStatus().textContent = activeVoiceTarget === "note"
+          ? "没有匹配到清楚的备注语音，请再说一遍。"
+          : "没有匹配到清楚的语音，请说慢一点：今天九点到十点我要做……";
+      };
+      voiceButtons.forEach(button => button.addEventListener("click", () => {
+        activeVoiceTarget = button.dataset.voiceTarget;
+        try {
+          recognition.start();
+        } catch {
+          activeStatus().textContent = "语音识别正在运行，请稍等。";
+        }
+      }));
+    }
+
+    form.addEventListener("submit", event => {
+      event.preventDefault();
+      const id = document.querySelector("#planId").value;
+      const nextPlan = {
+        id: id || crypto.randomUUID(),
+        date: document.querySelector("#workDate").value,
+        start: document.querySelector("#startTime").value,
+        end: document.querySelector("#endTime").value,
+        title: document.querySelector("#workTitle").value.trim(),
+        note: document.querySelector("#workNote").value.trim(),
+        status: document.querySelector("#workStatus").value,
+        priority: document.querySelector("#workPriority").value,
+        createdAt: id ? plans.find(plan => plan.id === id)?.createdAt || Date.now() : Date.now()
+      };
+      plans = id ? plans.map(plan => plan.id === id ? nextPlan : plan) : [...plans, nextPlan];
+      savePlans();
+      setSelectedDate(nextPlan.date);
+    });
+
+    document.querySelector("#tableWrap").addEventListener("click", event => {
+      const button = event.target.closest("button[data-action]");
+      if (!button) return;
+      const plan = plans.find(item => item.id === button.dataset.id);
+      if (!plan) return;
+      if (button.dataset.action === "toggle") {
+        plan.status = plan.status === "done" ? "todo" : "done";
+      }
+      if (button.dataset.action === "delete") {
+        plans = plans.filter(item => item.id !== plan.id);
+      }
+      if (button.dataset.action === "edit") {
+        document.querySelector("#planId").value = plan.id;
+        document.querySelector("#workDate").value = plan.date;
+        document.querySelector("#startTime").value = plan.start;
+        document.querySelector("#endTime").value = plan.end;
+        document.querySelector("#workTitle").value = plan.title;
+        document.querySelector("#workNote").value = plan.note;
+        document.querySelector("#workStatus").value = plan.status;
+        document.querySelector("#workPriority").value = plan.priority;
+        document.querySelector("#formTitle").textContent = "编辑时间段";
+        document.querySelector("#submitText").textContent = "保存修改";
+        document.querySelector("#submitIcon").textContent = "✓";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+      savePlans();
+      renderTable();
+    });
+
+    selectedDateInput.addEventListener("change", event => {
+      selectedDate = event.target.value || todayInput();
+      renderTable();
+      updateSyncRange();
+    });
+
+    document.querySelector("#prevDay").addEventListener("click", () => setSelectedDate(addDays(selectedDate, viewMode === "week" ? -7 : -1)));
+    document.querySelector("#nextDay").addEventListener("click", () => setSelectedDate(addDays(selectedDate, viewMode === "week" ? 7 : 1)));
+    document.querySelector("#todayBtn").addEventListener("click", () => setSelectedDate(todayInput()));
+
+    viewButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        viewMode = button.dataset.view;
+        renderTable();
+      });
+    });
+
+    document.querySelector("#clearDayDone").addEventListener("click", () => {
+      const dates = viewMode === "week" ? weekDates(selectedDate) : [selectedDate];
+      plans = plans.filter(plan => !dates.includes(plan.date) || plan.status !== "done");
+      savePlans();
+      renderTable();
+    });
+
+    document.querySelector("#syncMode").addEventListener("change", updateSyncRange);
+
+    document.querySelector("#syncBtn").addEventListener("click", () => {
+      const template = dayPlans();
+      if (!template.length) return;
+      const start = document.querySelector("#syncStart").value;
+      const end = document.querySelector("#syncEnd").value;
+      if (!start || !end || start > end) return;
+      const targets = datesBetween(start, end).filter(date => date !== selectedDate);
+      plans = plans.filter(plan => !targets.includes(plan.date));
+      const copies = targets.flatMap(date => template.map(plan => ({
+        ...plan,
+        id: crypto.randomUUID(),
+        date,
+        status: "todo",
+        createdAt: Date.now()
+      })));
+      plans = [...plans, ...copies];
+      savePlans();
+      renderTable();
+    });
+
+    updateClock();
+    setInterval(updateClock, 1000);
+    setupVoiceInput();
+    resetForm();
+    updateSyncRange();
+    renderTable();
+  </script>
+</body>
+</html>
