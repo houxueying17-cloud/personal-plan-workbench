@@ -85,6 +85,21 @@
       box-shadow: var(--shadow);
     }
 
+    .today-completion {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .today-completion strong {
+      margin-left: 6px;
+      color: var(--wine);
+      font-size: 24px;
+      font-variant-numeric: tabular-nums;
+    }
+
     .time {
       font-size: 34px;
       font-weight: 500;
@@ -291,36 +306,6 @@
 
     .board { min-width: 0; }
 
-    .summary {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      margin-bottom: 14px;
-    }
-
-    .stat {
-      padding: 16px;
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      background: #ffffff;
-      box-shadow: var(--shadow);
-    }
-
-    .stat strong {
-      display: block;
-      font-size: 26px;
-      font-weight: 500;
-      line-height: 1;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .stat span {
-      display: block;
-      margin-top: 6px;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
     .toolbar {
       display: grid;
       grid-template-columns: auto 1fr auto auto;
@@ -341,23 +326,6 @@
       color: var(--ink);
       font-weight: 600;
       text-align: center;
-    }
-
-    .progress {
-      height: 10px;
-      overflow: hidden;
-      margin-bottom: 14px;
-      border-radius: 999px;
-      background: #ffffff;
-      border: 1px solid var(--line);
-    }
-
-    .progress span {
-      display: block;
-      width: 0;
-      height: 100%;
-      background: var(--wine);
-      transition: width .25s ease;
     }
 
     .table-wrap {
@@ -564,7 +532,6 @@
     @media (max-width: 960px) {
       .topbar, .layout { grid-template-columns: 1fr; }
       .side { position: static; }
-      .summary { grid-template-columns: repeat(2, 1fr); }
       .toolbar { grid-template-columns: 1fr; }
       .day-nav { justify-content: center; }
       .view-toggle { width: 100%; }
@@ -577,8 +544,23 @@
       }
 
       h1 { font-size: 36px; }
-      .row, .sync-grid, .summary { grid-template-columns: 1fr; }
-      .time { font-size: 30px; }
+      .row, .sync-grid { grid-template-columns: 1fr; }
+      .today-completion {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .today-completion strong {
+      margin-left: 6px;
+      color: var(--wine);
+      font-size: 24px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .time { font-size: 30px; }
     }
   </style>
 </head>
@@ -593,13 +575,12 @@
       <section class="clock" aria-label="当前时间">
         <div class="time" id="time">--:--</div>
         <div class="date" id="date">正在读取日期</div>
+        <div class="today-completion" aria-live="polite">今日已完成 <strong id="todayCompletion">0%</strong></div>
       </section>
     </header>
 
     <section class="layout">
       <section class="board" aria-label="日计划表">
-        <div class="summary" id="summary"></div>
-        <div class="progress" aria-label="当天完成进度"><span id="progressBar"></span></div>
         <div class="panel toolbar">
           <div class="day-nav">
             <button class="mini" type="button" id="prevDay">‹ 前一天</button>
@@ -814,6 +795,7 @@
     }
 
     function updateClock() {
+      renderTodayCompletion();
       const now = new Date();
       document.querySelector("#time").textContent = now.toLocaleTimeString("zh-CN", {
         hour: "2-digit",
@@ -846,13 +828,6 @@
       return icons[name];
     }
 
-    function score(plan) {
-      if (plan.status === "done") return 1;
-      if (plan.status === "half") return .5;
-      if (plan.status === "doing") return .35;
-      return 0;
-    }
-
     function planSortValue(plan) {
       return `${plan.status === "done" ? 1 : 0}-${plan.start}-${plan.end}-${plan.createdAt || 0}`;
     }
@@ -882,23 +857,16 @@
         .sort((a, b) => `${a.date}-${planSortValue(a)}`.localeCompare(`${b.date}-${planSortValue(b)}`));
     }
 
-    function renderSummary(items) {
-      const total = items.length;
+    function renderTodayCompletion() {
+      const today = toDateInput(new Date());
+      const items = plans.filter(plan => plan.date === today);
       const done = items.filter(item => item.status === "done").length;
-      const half = items.filter(item => item.status === "half").length;
-      const percent = total ? Math.round(items.reduce((sum, item) => sum + score(item), 0) / total * 100) : 0;
-      document.querySelector("#summary").innerHTML = [
-        ["当天时间段", total],
-        ["已完成", done],
-        ["完成一半", half],
-        ["进度", `${percent}%`]
-      ].map(([label, value]) => `<div class="stat"><strong>${value}</strong><span>${label}</span></div>`).join("");
-      document.querySelector("#progressBar").style.width = `${percent}%`;
+      const percent = items.length ? Math.round(done / items.length * 100) : 0;
+      document.querySelector("#todayCompletion").textContent = `${percent}%`;
     }
 
     function renderDayTable() {
       const items = dayPlans();
-      renderSummary(items);
       selectedDateInput.value = selectedDate;
       document.querySelector("#dayTitle").textContent = new Date(`${selectedDate}T12:00:00`).toLocaleDateString("zh-CN", {
         year: "numeric",
@@ -961,7 +929,6 @@
       const items = weekPlans();
       const startLabel = new Date(`${dates[0]}T12:00:00`).toLocaleDateString("zh-CN", { month: "short", day: "numeric" });
       const endLabel = new Date(`${dates[6]}T12:00:00`).toLocaleDateString("zh-CN", { month: "short", day: "numeric" });
-      renderSummary(items);
       selectedDateInput.value = selectedDate;
       document.querySelector("#dayTitle").textContent = `${startLabel} - ${endLabel} 周计划`;
       document.querySelector("#tableWrap").innerHTML = `
@@ -1004,6 +971,7 @@
     }
 
     function renderTable() {
+      renderTodayCompletion();
       viewButtons.forEach(button => button.classList.toggle("active", button.dataset.view === viewMode));
       document.querySelector("#prevDay").textContent = viewMode === "week" ? "‹ 上一周" : "‹ 前一天";
       document.querySelector("#nextDay").textContent = viewMode === "week" ? "下一周 ›" : "后一天 ›";
