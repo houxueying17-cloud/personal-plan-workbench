@@ -100,7 +100,7 @@
 
     .layout {
       display: grid;
-      grid-template-columns: 360px 1fr;
+      grid-template-columns: minmax(0, 1fr) 360px;
       gap: 20px;
       align-items: start;
     }
@@ -597,6 +597,25 @@
     </header>
 
     <section class="layout">
+      <section class="board" aria-label="日计划表">
+        <div class="summary" id="summary"></div>
+        <div class="progress" aria-label="当天完成进度"><span id="progressBar"></span></div>
+        <div class="panel toolbar">
+          <div class="day-nav">
+            <button class="mini" type="button" id="prevDay">‹ 前一天</button>
+            <button class="mini" type="button" id="todayBtn">今天</button>
+            <button class="mini" type="button" id="nextDay">后一天 ›</button>
+          </div>
+          <div class="day-title" id="dayTitle">今天</div>
+          <div class="view-toggle" aria-label="视图切换">
+            <button type="button" class="active" data-view="day">日</button>
+            <button type="button" data-view="week">周</button>
+          </div>
+          <button class="ghost" type="button" id="clearDayDone">清理当天已完成</button>
+        </div>
+        <div class="table-wrap" id="tableWrap"></div>
+      </section>
+
       <aside class="side">
         <section class="panel box">
           <h2 class="panel-title" id="formTitle">录入时间段</h2>
@@ -687,25 +706,6 @@
           <p class="note">同步会复制当前日期的时间段和工作内容到目标日期。目标日期已有计划时，会先替换为这一天的模板。</p>
         </section>
       </aside>
-
-      <section class="board" aria-label="日计划表">
-        <div class="summary" id="summary"></div>
-        <div class="progress" aria-label="当天完成进度"><span id="progressBar"></span></div>
-        <div class="panel toolbar">
-          <div class="day-nav">
-            <button class="mini" type="button" id="prevDay">‹ 前一天</button>
-            <button class="mini" type="button" id="todayBtn">今天</button>
-            <button class="mini" type="button" id="nextDay">后一天 ›</button>
-          </div>
-          <div class="day-title" id="dayTitle">今天</div>
-          <div class="view-toggle" aria-label="视图切换">
-            <button type="button" class="active" data-view="day">日</button>
-            <button type="button" data-view="week">周</button>
-          </div>
-          <button class="ghost" type="button" id="clearDayDone">清理当天已完成</button>
-        </div>
-        <div class="table-wrap" id="tableWrap"></div>
-      </section>
     </section>
   </main>
 
